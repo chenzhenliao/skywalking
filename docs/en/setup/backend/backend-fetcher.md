@@ -94,7 +94,7 @@ kafka-fetcher:
     namespace: ${SW_NAMESPACE:""}
 ```
 
-`skywalking-segments`, `skywalking-metrics`, `skywalking-profile`, `skywalking-managements`, `skywalking-meters`, `skywalking-logs`
+`skywalking-segments`, `skywalking-metrics`, `skywalking-profilings`, `skywalking-managements`, `skywalking-meters`, `skywalking-logs`
 and `skywalking-logs-json` topics are required by `kafka-fetcher`.
 If they do not exist, Kafka Fetcher will create them by default. Also, you can create them by yourself before the OAP server starts.
 
@@ -108,7 +108,6 @@ kafka-fetcher:
     namespace: ${SW_NAMESPACE:""}
     partitions: ${SW_KAFKA_FETCHER_PARTITIONS:3}
     replicationFactor: ${SW_KAFKA_FETCHER_PARTITIONS_FACTOR:2}
-    enableMeterSystem: ${SW_KAFKA_FETCHER_ENABLE_METER_SYSTEM:false}
     isSharding: ${SW_KAFKA_FETCHER_IS_SHARDING:false}
     consumePartitions: ${SW_KAFKA_FETCHER_CONSUME_PARTITIONS:""}
 ```
@@ -124,7 +123,6 @@ kafka-fetcher:
     namespace: ${SW_NAMESPACE:""}
     partitions: ${SW_KAFKA_FETCHER_PARTITIONS:3}
     replicationFactor: ${SW_KAFKA_FETCHER_PARTITIONS_FACTOR:2}
-    enableMeterSystem: ${SW_KAFKA_FETCHER_ENABLE_METER_SYSTEM:false}
     isSharding: ${SW_KAFKA_FETCHER_IS_SHARDING:true}
     consumePartitions: ${SW_KAFKA_FETCHER_CONSUME_PARTITIONS:1,3,5}
     kafkaConsumerConfig:
@@ -141,7 +139,6 @@ kafka-fetcher:
     namespace: ${SW_NAMESPACE:""}
     partitions: ${SW_KAFKA_FETCHER_PARTITIONS:3}
     replicationFactor: ${SW_KAFKA_FETCHER_PARTITIONS_FACTOR:2}
-    enableMeterSystem: ${SW_KAFKA_FETCHER_ENABLE_METER_SYSTEM:false}
     isSharding: ${SW_KAFKA_FETCHER_IS_SHARDING:true}
     consumePartitions: ${SW_KAFKA_FETCHER_CONSUME_PARTITIONS:1,3,5}
     mm2SourceAlias: ${SW_KAFKA_MM2_SOURCE_ALIAS:""}

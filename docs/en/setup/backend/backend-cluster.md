@@ -1,6 +1,11 @@
 # Cluster Management
 In many product environments, the backend needs to support high throughput and provide HA to maintain robustness,
 so you always need cluster management in product env.
+
+NOTICE, cluster management doesn't provide service discovery mechanism for agents and probes. We recommend agents/probes using
+gateway to load balancer to access OAP clusters.
+
+The core feature of cluster management is supporting the whole OAP cluster running distributed aggregation and analysis for telemetry data.
  
 There are various ways to manage the cluster in the backend. Choose the one that best suits your needs.
 
@@ -17,7 +22,7 @@ You can specify any of them in the `selector` property to enable it.
 ## Zookeeper coordinator
 Zookeeper is a very common and widely used cluster coordinator. Set the **cluster/selector** to **zookeeper** in the yml to enable it.
 
-Required Zookeeper version: 3.4+
+Required Zookeeper version: 3.5+
 
 ```yaml
 cluster:
@@ -26,9 +31,9 @@ cluster:
 ```
 
 - `hostPort` is the list of zookeeper servers. Format is `IP1:PORT1,IP2:PORT2,...,IPn:PORTn`
-- `enableACL` enable [Zookeeper ACL](https://zookeeper.apache.org/doc/r3.4.1/zookeeperProgrammers.html#sc_ZooKeeperAccessControl) to control access to its znode.
+- `enableACL` enable [Zookeeper ACL](https://zookeeper.apache.org/doc/r3.5.5/zookeeperProgrammers.html#sc_ZooKeeperAccessControl) to control access to its znode.
 - `schema` is Zookeeper ACL schemas.
-- `expression` is a expression of ACL. The format of the expression is specific to the [schema](https://zookeeper.apache.org/doc/r3.4.1/zookeeperProgrammers.html#sc_BuiltinACLSchemes). 
+- `expression` is a expression of ACL. The format of the expression is specific to the [schema](https://zookeeper.apache.org/doc/r3.5.5/zookeeperProgrammers.html#sc_BuiltinACLSchemes). 
 - `hostPort`, `baseSleepTimeMs` and `maxRetries` are settings of Zookeeper curator client.
 
 Note: 
@@ -84,12 +89,20 @@ The following settings are provided to set the host and port manually, based on 
 
 
 ## Etcd
-Set the **cluster/selector** to **etcd** in the yml to enable it.
+Set the **cluster/selector** to **etcd** in the yml to enable it. The Etcd client has upgraded to v3 protocol and changed to the CoreOS official library. **Since 8.7.0, only the v3 protocol is supported for Etcd.** 
 
 ```yaml
 cluster:
   selector: ${SW_CLUSTER:etcd}
   # other configurations
+  etcd:
+    # etcd cluster nodes, example: 10.0.0.1:2379,10.0.0.2:2379,10.0.0.3:2379
+    endpoints: ${SW_CLUSTER_ETCD_ENDPOINTS:localhost:2379}
+    namespace: ${SW_CLUSTER_ETCD_NAMESPACE:/skywalking}
+    serviceName: ${SW_SCLUSTER_ETCD_ERVICE_NAME:"SkyWalking_OAP_Cluster"}
+    authentication: ${SW_CLUSTER_ETCD_AUTHENTICATION:false}
+    user: ${SW_SCLUSTER_ETCD_USER:}
+    password: ${SW_SCLUSTER_ETCD_PASSWORD:}
 ```
 
 Same as the Zookeeper coordinator,
