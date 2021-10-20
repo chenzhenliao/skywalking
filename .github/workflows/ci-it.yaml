@@ -25,6 +25,9 @@ concurrency:
   group: ci-it-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  MAVEN_OPTS: -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
+
 jobs:
   check-license-header:
     if: (github.event_name == 'schedule' && github.repository == 'apache/skywalking') || (github.event_name != 'schedule')
@@ -64,7 +67,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-maven-ci-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
       - uses: actions/setup-java@v2
         if: env.SKIP_CI != 'true'
@@ -79,6 +82,7 @@ jobs:
         if: env.SKIP_CI != 'true' && matrix.os != 'ubuntu'
         run: ./mvnw -q --batch-mode -P"backend,ui,dist" clean verify install
       - uses: actions/upload-artifact@v2
+        if: env.SKIP_CI != 'true' && matrix.os == 'ubuntu' && matrix.java-version == '8'
         name: Upload Agent
         with:
           name: dist
@@ -100,6 +104,13 @@ jobs:
         with:
           name: dist
           path: dist
+      - name: Cache local Maven repository
+        if: env.SKIP_CI != 'true'
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-ci-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
       - name: Check Dependencies Licenses
         if: env.SKIP_CI != 'true'
         run: tools/dependencies/check-LICENSE.sh

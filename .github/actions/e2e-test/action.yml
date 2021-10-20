@@ -41,11 +41,14 @@ runs:
       run: |
         echo "::group::Build Docker Image"
         # Retry one more time due to frequent "maven connection reset"
-        (make docker || make docker) && (ES_VERSION=es7 TAG=latest-es7 make docker.oap || ES_VERSION=es7 TAG=latest-es7 make docker.oap)
+        make docker || make docker
         echo "::endgroup::"
     - name: Run E2E Test
       shell: bash
       run: |
+        echo "::group::Build E2E Test Modules"
+        ./mvnw -q -B -f test/e2e/pom.xml clean install
+        echo "::endgroup::"
         echo "::group::Run E2E Test ${{ inputs.test_class }}"
-        ./mvnw --batch-mode -f test/e2e/pom.xml -am -DfailIfNoTests=false verify -Dit.test=${{ inputs.test_class }}
+        ./mvnw -q --batch-mode -f test/e2e/pom.xml -am -DfailIfNoTests=false test -Dtest=${{ inputs.test_class }}
         echo "::endgroup::"

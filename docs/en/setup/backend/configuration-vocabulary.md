@@ -47,7 +47,7 @@ core|default|role|Option values: `Mixed/Receiver/Aggregator`. **Receiver** mode 
 | - | - | prepareThreads| The number of threads used to prepare metrics data to the storage. | SW_CORE_PREPARE_THREADS | 2 |
 | - | - | enableEndpointNameGroupingByOpenapi | Automatically groups endpoints by the given OpenAPI definitions. | SW_CORE_ENABLE_ENDPOINT_NAME_GROUPING_BY_OPAENAPI | true |
 |cluster|standalone| - | Standalone is not suitable for running on a single node running. No configuration available. | - | - |
-| - | zookeeper|nameSpace| The namespace, represented by root path, isolates the configurations in Zookeeper.|SW_NAMESPACE| `/`, root path|
+| - | zookeeper|namespace| The namespace, represented by root path, isolates the configurations in Zookeeper.|SW_NAMESPACE| `/`, root path|
 | - | - | hostPort| Hosts and ports of Zookeeper Cluster. |SW_CLUSTER_ZK_HOST_PORT| localhost:2181|
 | - | - | baseSleepTimeMs| The period of Zookeeper client between two retries (in milliseconds). |SW_CLUSTER_ZK_SLEEP_TIME|1000|
 | - | - | maxRetries| The maximum retry time. |SW_CLUSTER_ZK_MAX_RETRIES|3|
@@ -79,12 +79,13 @@ core|default|role|Option values: `Mixed/Receiver/Aggregator`. **Receiver** mode 
 | - | - | password | Nacos Auth password. | SW_CLUSTER_NACOS_PASSWORD | - |
 | - | - | accessKey | Nacos Auth accessKey. | SW_CLUSTER_NACOS_ACCESSKEY | - |
 | - | - | secretKey | Nacos Auth secretKey.  | SW_CLUSTER_NACOS_SECRETKEY | - |
-| storage|elasticsearch| - | ElasticSearch 6 storage implementation. | - | - |
-| - | - | nameSpace | Prefix of indexes created and used by SkyWalking. | SW_NAMESPACE | - |
+| storage|elasticsearch| - | ElasticSearch (and OpenSearch) storage implementation. | - | - |
+| - | - | namespace | Prefix of indexes created and used by SkyWalking. | SW_NAMESPACE | - |
 | - | - | clusterNodes | ElasticSearch cluster nodes for client connection.| SW_STORAGE_ES_CLUSTER_NODES |localhost|
 | - | - | protocol | HTTP or HTTPs. | SW_STORAGE_ES_HTTP_PROTOCOL | HTTP|
 | - | - | connectTimeout | Connect timeout of ElasticSearch client (in milliseconds). | SW_STORAGE_ES_CONNECT_TIMEOUT | 500|
 | - | - | socketTimeout | Socket timeout of ElasticSearch client (in milliseconds). | SW_STORAGE_ES_SOCKET_TIMEOUT | 30000|
+| - | - | numHttpClientThread | The number of threads for the underlying HTTP client to perform socket I/O. If the value is <= 0, the number of available processors will be used. | SW_STORAGE_ES_NUM_HTTP_CLIENT_THREAD | 0 |
 | - | - | user| Username of ElasticSearch cluster. | SW_ES_USER | - |
 | - | - | password | Password of ElasticSearch cluster. | SW_ES_PASSWORD | - |
 | - | - | trustStorePath | Trust JKS file path. Only works when username and password are enabled. | SW_STORAGE_ES_SSL_JKS_PATH | - |
@@ -105,32 +106,6 @@ core|default|role|Option values: `Mixed/Receiver/Aggregator`. **Receiver** mode 
 | - | - | segmentQueryMaxSize | The maximum size of trace segments per query. | SW_STORAGE_ES_QUERY_SEGMENT_SIZE | 200|
 | - | - | profileTaskQueryMaxSize | The maximum size of profile task per query. | SW_STORAGE_ES_QUERY_PROFILE_TASK_SIZE | 200|
 | - | - | advanced | All settings of ElasticSearch index creation. The value should be in JSON format. | SW_STORAGE_ES_ADVANCED | - |
-| - |elasticsearch7| - | ElasticSearch 7 storage implementation. | - | - |
-| - | - | nameSpace | Prefix of indexes created and used by SkyWalking. | SW_NAMESPACE | - |
-| - | - | clusterNodes | ElasticSearch cluster nodes for client connection.| SW_STORAGE_ES_CLUSTER_NODES |localhost|
-| - | - | protocol | HTTP or HTTPs. | SW_STORAGE_ES_HTTP_PROTOCOL | HTTP|
-| - | - | connectTimeout | Connect timeout of ElasticSearch client (in milliseconds). | SW_STORAGE_ES_CONNECT_TIMEOUT | 500|
-| - | - | socketTimeout | Socket timeout of ElasticSearch client (in milliseconds). | SW_STORAGE_ES_SOCKET_TIMEOUT | 30000|
-| - | - | user| Username of ElasticSearch cluster.| SW_ES_USER | - |
-| - | - | password | Password of ElasticSearch cluster. | SW_ES_PASSWORD | - |
-| - | - | trustStorePath | Trust JKS file path. Only works when username and password are enabled. | SW_STORAGE_ES_SSL_JKS_PATH | - |
-| - | - | trustStorePass | Trust JKS file password. Only works when username and password are enabled. | SW_STORAGE_ES_SSL_JKS_PASS | - |
-| - | - | secretsManagementFile| Secrets management file in the properties format, including username and password, which are managed by a 3rd party tool. Capable of being updated at runtime. |SW_ES_SECRETS_MANAGEMENT_FILE | - |
-| - | - | dayStep| Represents the number of days in the one-minute/hour/day index. | SW_STORAGE_DAY_STEP | 1|
-| - | - | indexShardsNumber | Shard number of new indexes. | SW_STORAGE_ES_INDEX_SHARDS_NUMBER | 1 |
-| - | - | indexReplicasNumber | Replicas number of new indexes. | SW_STORAGE_ES_INDEX_REPLICAS_NUMBER | 0 |
-| - | - | superDatasetDayStep | Represents the number of days in the super size dataset record index. Default value is the same as dayStep when the value is less than 0. |SW_SUPERDATASET_STORAGE_DAY_STEP|-1 |
-| - | - | superDatasetIndexShardsFactor | Super dataset is defined in the code (e.g. trace segments). This factor provides more shards for the super dataset: shards number = indexShardsNumber * superDatasetIndexShardsFactor. This factor also affects Zipkin and Jaeger traces. |SW_STORAGE_ES_SUPER_DATASET_INDEX_SHARDS_FACTOR|5 |
-| - | - | superDatasetIndexReplicasNumber | Represents the replicas number in the super size dataset record index. |SW_STORAGE_ES_SUPER_DATASET_INDEX_REPLICAS_NUMBER|0 |
-| - | - | indexTemplateOrder| The order of index template. | SW_STORAGE_ES_INDEX_TEMPLATE_ORDER| 0|
-| - | - | bulkActions| Async bulk size of data batch execution. | SW_STORAGE_ES_BULK_ACTIONS| 5000|
-| - | - | flushInterval| Period of flush (in seconds). Does not matter whether `bulkActions` is reached or not. INT(flushInterval * 2/3) is used for index refresh period. | SW_STORAGE_ES_FLUSH_INTERVAL | 15 (index refresh period = 10)|
-| - | - | concurrentRequests| The number of concurrent requests allowed to be executed. | SW_STORAGE_ES_CONCURRENT_REQUESTS| 2 |
-| - | - | resultWindowMaxSize | The maximum size of dataset when the OAP loads cache, such as network aliases. | SW_STORAGE_ES_QUERY_MAX_WINDOW_SIZE | 10000|
-| - | - | metadataQueryMaxSize | The maximum size of metadata per query. | SW_STORAGE_ES_QUERY_MAX_SIZE | 5000 |
-| - | - | segmentQueryMaxSize | The maximum size of trace segments per query. | SW_STORAGE_ES_QUERY_SEGMENT_SIZE | 200|
-| - | - | profileTaskQueryMaxSize | The maximum size of profile task per query. | SW_STORAGE_ES_QUERY_PROFILE_TASK_SIZE | 200|
-| - | - | advanced | All settings of ElasticSearch index creation. The value should be in JSON format. | SW_STORAGE_ES_ADVANCED | - |
 | - |h2| - |  H2 storage is designed for demonstration and running in short term (i.e. 1-2 hours) only. | - | - |
 | - | - | driver | H2 JDBC driver. | SW_STORAGE_H2_DRIVER | org.h2.jdbcx.JdbcDataSource|
 | - | - | url | H2 connection URL. Defaults to H2 memory mode. | SW_STORAGE_H2_URL | jdbc:h2:mem:skywalking-oap-db |
@@ -139,16 +114,22 @@ core|default|role|Option values: `Mixed/Receiver/Aggregator`. **Receiver** mode 
 | - | - | metadataQueryMaxSize | The maximum size of metadata per query. | SW_STORAGE_H2_QUERY_MAX_SIZE | 5000 |
 | - | - | maxSizeOfArrayColumn | Some entities (e.g. trace segments) include the logic column with multiple values. In H2, we use multiple physical columns to host the values: e.g. change column_a with values [1,2,3,4,5] to `column_a_0 = 1, column_a_1 = 2, column_a_2 = 3 , column_a_3 = 4, column_a_4 = 5`. | SW_STORAGE_MAX_SIZE_OF_ARRAY_COLUMN | 20 |
 | - | - | numOfSearchableValuesPerTag | In a trace segment, this includes multiple spans with multiple tags. Different spans may have the same tag key, e.g. multiple HTTP exit spans all have their own `http.method` tags. This configuration sets the limit on the maximum number of values for the same tag key. | SW_STORAGE_NUM_OF_SEARCHABLE_VALUES_PER_TAG | 2 |
+| - | - | maxSizeOfBatchSql | The maximum size of batch size of SQL execution | SW_STORAGE_MAX_SIZE_OF_BATCH_SQL | 100 |
+| - | - | asyncBatchPersistentPoolSize | async flush data into database thread size | SW_STORAGE_ASYNC_BATCH_PERSISTENT_POOL_SIZE | 1 |
 | - |mysql| - | MySQL Storage. The MySQL JDBC Driver is not in the dist. Please copy it into the oap-lib folder manually. | - | - |
 | - | - | properties | Hikari connection pool configurations. | - | Listed in the `application.yaml`. |
 | - | - | metadataQueryMaxSize | The maximum size of metadata per query. | SW_STORAGE_MYSQL_QUERY_MAX_SIZE | 5000 |
 | - | - | maxSizeOfArrayColumn | Some entities (e.g. trace segments) include the logic column with multiple values. In MySQL, we use multiple physical columns to host the values, e.g. change column_a with values [1,2,3,4,5] to `column_a_0 = 1, column_a_1 = 2, column_a_2 = 3 , column_a_3 = 4, column_a_4 = 5`. | SW_STORAGE_MAX_SIZE_OF_ARRAY_COLUMN | 20 |
 | - | - | numOfSearchableValuesPerTag | In a trace segment, this includes multiple spans with multiple tags. Different spans may have same tag key, e.g. multiple HTTP exit spans all have their own `http.method` tags. This configuration sets the limit on the maximum number of values for the same tag key. | SW_STORAGE_NUM_OF_SEARCHABLE_VALUES_PER_TAG | 2 |
+| - | - | maxSizeOfBatchSql | The maximum size of batch size of SQL execution | SW_STORAGE_MAX_SIZE_OF_BATCH_SQL | 2000 |
+| - | - | asyncBatchPersistentPoolSize | async flush data into database thread size | SW_STORAGE_ASYNC_BATCH_PERSISTENT_POOL_SIZE | 4 |
 | - |postgresql| - | PostgreSQL storage. | - | - |
 | - | - | properties | Hikari connection pool configurations. | - | Listed in the `application.yaml`. |
 | - | - | metadataQueryMaxSize | The maximum size of metadata per query. | SW_STORAGE_MYSQL_QUERY_MAX_SIZE | 5000 |
 | - | - | maxSizeOfArrayColumn | Some entities (e.g. trace segments) include the logic column with multiple values. In PostgreSQL, we use multiple physical columns to host the values, e.g. change column_a with values [1,2,3,4,5] to `column_a_0 = 1, column_a_1 = 2, column_a_2 = 3 , column_a_3 = 4, column_a_4 = 5` | SW_STORAGE_MAX_SIZE_OF_ARRAY_COLUMN | 20 |
 | - | - | numOfSearchableValuesPerTag | In a trace segment, this includes multiple spans with multiple tags. Different spans may have same tag key, e.g. multiple HTTP exit spans all have their own `http.method` tags. This configuration sets the limit on the maximum number of values for the same tag key. | SW_STORAGE_NUM_OF_SEARCHABLE_VALUES_PER_TAG | 2 |
+| - | - | maxSizeOfBatchSql | The maximum size of batch size of SQL execution | SW_STORAGE_MAX_SIZE_OF_BATCH_SQL | 2000 |
+| - | - | asyncBatchPersistentPoolSize | async flush data into database thread size | SW_STORAGE_ASYNC_BATCH_PERSISTENT_POOL_SIZE | 4 |
 | - |influxdb| - | InfluxDB storage. |- | - |
 | - | - | url| InfluxDB connection URL. | SW_STORAGE_INFLUXDB_URL | http://localhost:8086|
 | - | - | user | User name of InfluxDB. | SW_STORAGE_INFLUXDB_USER | root|
@@ -160,12 +141,11 @@ core|default|role|Option values: `Mixed/Receiver/Aggregator`. **Receiver** mode 
 | - | - | fetchTaskLogMaxSize | The maximum number of fetch task log in a request. | SW_STORAGE_INFLUXDB_FETCH_TASK_LOG_MAX_SIZE | 5000|
 | - | - | connectionResponseFormat | The response format of connection to influxDB. It can only be MSGPACK or JSON. | SW_STORAGE_INFLUXDB_CONNECTION_RESPONSE_FORMAT | MSGPACK |
 | agent-analyzer | default | Agent Analyzer. | SW_AGENT_ANALYZER | default |
-| - | -| sampleRate| Sampling rate for receiving trace. Precise to 1/10000. 10000 means a sampling rate of 100% by default.|SW_TRACE_SAMPLE_RATE|10000|
+| - | - | traceSamplingPolicySettingsFile | The sampling policy including `sampling rate` and `the threshold of trace segment latency` can be configured by the `traceSamplingPolicySettingsFile` file. | SW_TRACE_SAMPLING_POLICY_SETTINGS_FILE | `trace-sampling-policy-settings.yml` |
 | - | - |slowDBAccessThreshold| The slow database access threshold (in milliseconds). |SW_SLOW_DB_THRESHOLD|default:200,mongodb:100|
 | - | - |forceSampleErrorSegment| When sampling mechanism is activated, this config samples the error status segment and ignores the sampling rate. |SW_FORCE_SAMPLE_ERROR_SEGMENT|true|
 | - | - |segmentStatusAnalysisStrategy| Determines the final segment status from span status. Available values are `FROM_SPAN_STATUS` , `FROM_ENTRY_SPAN`, and `FROM_FIRST_SPAN`. `FROM_SPAN_STATUS` indicates that the segment status would be error if any span has an error status. `FROM_ENTRY_SPAN` means that the segment status would only be determined by the status of entry spans. `FROM_FIRST_SPAN` means that the segment status would only be determined by the status of the first span. |SW_SEGMENT_STATUS_ANALYSIS_STRATEGY|FROM_SPAN_STATUS|
 | - | - |noUpstreamRealAddressAgents| Exit spans with the component in the list would not generate client-side instance relation metrics, since some tracing plugins (e.g. Nginx-LUA and Envoy) can't collect the real peer IP address. |SW_NO_UPSTREAM_REAL_ADDRESS|6000,9000|
-| - | - |slowTraceSegmentThreshold| Setting this threshold on latency (in milliseconds) would cause the slow trace segments to be sampled if they use up more time, even if the sampling mechanism is activated. The default value is `-1`, which means that slow traces would not be sampled. |SW_SLOW_TRACE_SEGMENT_THRESHOLD|-1|
 | - | - |meterAnalyzerActiveFiles| Indicates which files could be instrumented and analyzed. Multiple files are split by ",". |SW_METER_ANALYZER_ACTIVE_FILES||
 | receiver-sharing-server|default| Sharing server provides new gRPC and restful servers for data collection. Ana designates that servers in the core module are to be used for internal communication only. | - | - |
 | - | - | restHost| Binding IP of RESTful services. Services include GraphQL query and HTTP data report. | SW_RECEIVER_SHARING_REST_HOST | - |
@@ -262,12 +242,12 @@ core|default|role|Option values: `Mixed/Receiver/Aggregator`. **Receiver** mode 
 | - | - | apolloEnv | `env` in Apollo. | SW_CONFIG_APOLLO_ENV | - |
 | - | - | appId | `app.id` in Apollo. | SW_CONFIG_APOLLO_APP_ID | skywalking |
 | - | - | period | The period of data sync (in seconds). | SW_CONFIG_APOLLO_PERIOD | 60 |
-| - | zookeeper|nameSpace| The namespace (represented by root path) that isolates the configurations in the Zookeeper. |SW_CONFIG_ZK_NAMESPACE| `/`, root path|
+| - | zookeeper|namespace| The namespace (represented by root path) that isolates the configurations in the Zookeeper. |SW_CONFIG_ZK_NAMESPACE| `/`, root path|
 | - | - | hostPort| Hosts and ports of Zookeeper Cluster. |SW_CONFIG_ZK_HOST_PORT| localhost:2181|
 | - | - | baseSleepTimeMs|The period of Zookeeper client between two retries (in milliseconds). |SW_CONFIG_ZK_BASE_SLEEP_TIME_MS|1000|
 | - | - | maxRetries| The maximum retry time. |SW_CONFIG_ZK_MAX_RETRIES|3|
 | - | - | period | The period of data sync (in seconds). | SW_CONFIG_ZK_PERIOD | 60 |
-| - | etcd| endpoints | Hosts and ports for etcd cluster (separated by commas if multiple). | SW_CONFIG_ETCD_ENDPOINTS | localhost:2379 | 
+| - | etcd| endpoints | Hosts and ports for etcd cluster (separated by commas if multiple). | SW_CONFIG_ETCD_ENDPOINTS | http://localhost:2379 | 
 | - | - | namespace | Namespace for SkyWalking cluster. |SW_CONFIG_ETCD_NAMESPACE | /skywalking |
 | - | - | authentication | Indicates whether there is authentication. | SW_CONFIG_ETCD_AUTHENTICATION | false |
 | - | - | user | Etcd auth username. | SW_CONFIG_ETCD_USER | |

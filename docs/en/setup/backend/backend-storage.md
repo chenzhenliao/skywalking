@@ -4,7 +4,7 @@ use one of them by specifying it as the `selector` in `application.yml`：
 
 ```yaml
 storage:
-  selector: ${SW_STORAGE:elasticsearch7}
+  selector: ${SW_STORAGE:elasticsearch}
 ```
 
 Natively supported storage:
@@ -30,13 +30,14 @@ storage:
     driver: org.h2.jdbcx.JdbcDataSource
     url: jdbc:h2:mem:skywalking-oap-db
     user: sa
+    maxSizeOfBatchSql: ${SW_STORAGE_MAX_SIZE_OF_BATCH_SQL:100}
+    asyncBatchPersistentPoolSize: ${SW_STORAGE_ASYNC_BATCH_PERSISTENT_POOL_SIZE:1}
 ```
 
 ## OpenSearch
 
-OpenSearch storage shares the same configurations as ElasticSearch 7.
-In order to activate ElasticSearch 7 as storage, set storage provider to **elasticsearch7**.
-Please download the `apache-skywalking-bin-es7.tar.gz` if you want to use OpenSearch as storage.
+OpenSearch storage shares the same configurations as ElasticSearch.
+In order to activate OpenSearch as storage, set storage provider to **elasticsearch**.
 
 ## ElasticSearch
 
@@ -44,21 +45,18 @@ Please download the `apache-skywalking-bin-es7.tar.gz` if you want to use OpenSe
 License (SSPL), which is incompatible with Apache License 2.0. This license change is effective from Elasticsearch
 version 7.11. So please choose the suitable ElasticSearch version according to your usage.
 
-- In order to activate ElasticSearch 6 as storage, set storage provider to **elasticsearch**
-- In order to activate ElasticSearch 7 as storage, set storage provider to **elasticsearch7**
+Since 8.8.0, SkyWalking rebuilds the ElasticSearch client on top of ElasticSearch REST API and automatically picks up
+correct request formats according to the server side version, hence you don't need to download different binaries
+and don't need to configure different storage selector for different ElasticSearch server side version anymore.
 
-**Required ElasticSearch 6.3.2 or higher. HTTP RestHighLevelClient is used to connect server.**
-
-- For ElasticSearch 6.3.2 ~ 7.0.0 (excluded), please download `apache-skywalking-bin.tar.gz`.
-- For ElasticSearch 7.0.0 ~ 8.0.0 (excluded), please download `apache-skywalking-bin-es7.tar.gz`.
-
-For now, ElasticSearch 6 and ElasticSearch 7 share the same configurations as follows:
+For now, SkyWalking supports ElasticSearch 6.x, ElasticSearch 7.x, and OpenSearch 1.x, their configurations are as
+follows:
 
 ```yaml
 storage:
   selector: ${SW_STORAGE:elasticsearch}
   elasticsearch:
-    nameSpace: ${SW_NAMESPACE:""}
+    namespace: ${SW_NAMESPACE:""}
     clusterNodes: ${SW_STORAGE_ES_CLUSTER_NODES:localhost:9200}
     protocol: ${SW_STORAGE_ES_HTTP_PROTOCOL:"http"}
     trustStorePath: ${SW_STORAGE_ES_SSL_JKS_PATH:""}
@@ -86,7 +84,7 @@ storage:
     advanced: ${SW_STORAGE_ES_ADVANCED:""}
 ```
 
-### ElasticSearch 6 With Https SSL Encrypting communications.
+### ElasticSearch With Https SSL Encrypting communications.
 
 Example: 
 
@@ -94,7 +92,7 @@ Example:
 storage:
   selector: ${SW_STORAGE:elasticsearch}
   elasticsearch:
-    # nameSpace: ${SW_NAMESPACE:""}
+    namespace: ${SW_NAMESPACE:""}
     user: ${SW_ES_USER:""} # User needs to be set when Http Basic authentication is enabled
     password: ${SW_ES_PASSWORD:""} # Password to be set when Http Basic authentication is enabled
     clusterNodes: ${SW_STORAGE_ES_CLUSTER_NODES:localhost:443}
@@ -163,14 +161,14 @@ index.max_result_window: 1000000
 We strongly recommend that you read more about these configurations from ElasticSearch's official document, since they have a direct impact on the performance of ElasticSearch.
 
 
-### ElasticSearch 7 with Zipkin trace extension
-This implementation is very similar to `elasticsearch7`, except that it extends to support Zipkin span storage.
+### ElasticSearch with Zipkin trace extension
+This implementation is very similar to `elasticsearch`, except that it extends to support Zipkin span storage.
 The configurations are largely the same.
 ```yaml
 storage:
-  selector: ${SW_STORAGE:zipkin-elasticsearch7}
-  zipkin-elasticsearch7:
-    nameSpace: ${SW_NAMESPACE:""}
+  selector: ${SW_STORAGE:zipkin-elasticsearch}
+  zipkin-elasticsearch:
+    namespace: ${SW_NAMESPACE:""}
     clusterNodes: ${SW_STORAGE_ES_CLUSTER_NODES:localhost:9200}
     protocol: ${SW_STORAGE_ES_HTTP_PROTOCOL:"http"}
     user: ${SW_ES_USER:""}
@@ -198,7 +196,7 @@ storage:
   selector: ${SW_STORAGE:mysql}
   mysql:
     properties:
-      jdbcUrl: ${SW_JDBC_URL:"jdbc:mysql://localhost:3306/swtest"}
+      jdbcUrl: ${SW_JDBC_URL:"jdbc:mysql://localhost:3306/swtest?rewriteBatchedStatements=true"}
       dataSource.user: ${SW_DATA_SOURCE_USER:root}
       dataSource.password: ${SW_DATA_SOURCE_PASSWORD:root@1234}
       dataSource.cachePrepStmts: ${SW_DATA_SOURCE_CACHE_PREP_STMTS:true}
@@ -206,9 +204,12 @@ storage:
       dataSource.prepStmtCacheSqlLimit: ${SW_DATA_SOURCE_PREP_STMT_CACHE_SQL_LIMIT:2048}
       dataSource.useServerPrepStmts: ${SW_DATA_SOURCE_USE_SERVER_PREP_STMTS:true}
     metadataQueryMaxSize: ${SW_STORAGE_MYSQL_QUERY_MAX_SIZE:5000}
+    maxSizeOfBatchSql: ${SW_STORAGE_MAX_SIZE_OF_BATCH_SQL:2000}
+    asyncBatchPersistentPoolSize: ${SW_STORAGE_ASYNC_BATCH_PERSISTENT_POOL_SIZE:4}
 ```
 All connection-related settings, including URL link, username, and password are found in `application.yml`. 
 Only part of the settings are listed here. See the [HikariCP](https://github.com/brettwooldridge/HikariCP) connection pool document for full settings.
+To understand the function of the parameter `rewriteBatchedStatements=true` in MySQL, see the [MySQL official document](https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-connp-props-performance-extensions.html#cj-conn-prop_rewriteBatchedStatements).
 
 ## TiDB
 Tested TiDB Server 4.0.8 version and MySQL Client driver 8.0.13 version are currently available.
@@ -219,7 +220,7 @@ storage:
   selector: ${SW_STORAGE:tidb}
   tidb:
     properties:
-      jdbcUrl: ${SW_JDBC_URL:"jdbc:mysql://localhost:4000/swtest"}
+      jdbcUrl: ${SW_JDBC_URL:"jdbc:mysql://localhost:4000/swtest?rewriteBatchedStatements=true"}
       dataSource.user: ${SW_DATA_SOURCE_USER:root}
       dataSource.password: ${SW_DATA_SOURCE_PASSWORD:""}
       dataSource.cachePrepStmts: ${SW_DATA_SOURCE_CACHE_PREP_STMTS:true}
@@ -230,9 +231,12 @@ storage:
     metadataQueryMaxSize: ${SW_STORAGE_MYSQL_QUERY_MAX_SIZE:5000}
     maxSizeOfArrayColumn: ${SW_STORAGE_MAX_SIZE_OF_ARRAY_COLUMN:20}
     numOfSearchableValuesPerTag: ${SW_STORAGE_NUM_OF_SEARCHABLE_VALUES_PER_TAG:2}
+    maxSizeOfBatchSql: ${SW_STORAGE_MAX_SIZE_OF_BATCH_SQL:2000}
+    asyncBatchPersistentPoolSize: ${SW_STORAGE_ASYNC_BATCH_PERSISTENT_POOL_SIZE:4}
 ```
 All connection-related settings, including URL link, username, and password are found in `application.yml`. 
 For details on settings, refer to the configuration of *MySQL* above.
+To understand the function of the parameter `rewriteBatchedStatements=true` in TiDB, see the document of [TiDB best practices](https://docs.pingcap.com/tidb/stable/java-app-best-practices#use-batch-api).
 
 ## InfluxDB
 InfluxDB storage provides a time-series database as a new storage option.
@@ -270,6 +274,8 @@ storage:
     metadataQueryMaxSize: ${SW_STORAGE_MYSQL_QUERY_MAX_SIZE:5000}
     maxSizeOfArrayColumn: ${SW_STORAGE_MAX_SIZE_OF_ARRAY_COLUMN:20}
     numOfSearchableValuesPerTag: ${SW_STORAGE_NUM_OF_SEARCHABLE_VALUES_PER_TAG:2}
+    maxSizeOfBatchSql: ${SW_STORAGE_MAX_SIZE_OF_BATCH_SQL:2000}
+    asyncBatchPersistentPoolSize: ${SW_STORAGE_ASYNC_BATCH_PERSISTENT_POOL_SIZE:4}
 ```
 All connection-related settings, including URL link, username, and password are found in `application.yml`. 
 Only part of the settings are listed here. Please follow [HikariCP](https://github.com/brettwooldridge/HikariCP) connection pool document for full settings.

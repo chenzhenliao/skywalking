@@ -33,16 +33,14 @@ jobs:
     timeout-minutes: 90
     strategy:
       matrix:
-        jdk: [ 8, 9, 10, 11, 12, 13, 14, 15 ]
+        jdk: [ 8, 11, 12, 13, 14, 15 ]
     env:
-      SW_SIMPLE_CASE: jdk
       SW_AGENT_JDK_VERSION: ${{ matrix.jdk }}
-      SW_OAP_BASE_IMAGE: adoptopenjdk/openjdk${{ matrix.jdk }}:alpine
+      SW_OAP_BASE_IMAGE: adoptopenjdk/openjdk${{ matrix.jdk }}:alpine-jre
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: true
-          depth: 0
       - name: Set Skip Env Var
         uses: ./.github/actions/skip
       - name: Set Up Java
@@ -53,9 +51,9 @@ jobs:
           java-version: ${{ matrix.jdk }}
       - name: Run E2E Test
         if: env.SKIP_CI != 'true'
-        uses: ./.github/actions/e2e-test
+        uses: ./.github/actions/infra-e2e-test
         with:
-          test_class: org.apache.skywalking.e2e.simple.SimpleE2E
+          config-file: simple/jdk/e2e.yaml
 
   Single:
     if: (github.event_name == 'schedule' && github.repository == 'apache/skywalking') || (github.event_name != 'schedule')
